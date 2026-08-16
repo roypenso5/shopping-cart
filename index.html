@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Smart Shopping List</title>
+
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --bg: #f8fafc;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --border: #cbd5e1;
+            --surface: #ffffff;
+            --row-border: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+        }
+
+        button, input, select {
+            font: inherit;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 540px;
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            align-self: flex-start;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 6px;
+        }
+
+        .lang-select {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            outline: none;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 1.6rem;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .list-meta {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .summary-card {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .summary-title {
+            color: #065f46;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .summary-cost {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #047857;
+        }
+
+        .edit-cost-btn {
+            background: none;
+            border: none;
+            color: #059669;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.85rem;
+            margin: 0 6px;
+            padding: 4px;
+        }
+
+        .add-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 18px;
+        }
+
+        .inputs-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        input, select, .add-btn {
+            height: 48px;
+            border-radius: 10px;
+            font-size: 1rem; /* 16px prevents iOS browser auto-zoom */
+            outline: none;
+        }
+
+        input {
+            width: 100%;
+            padding: 0 14px;
+            border: 1.5px solid var(--border);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        select {
+            flex: 1;
+            min-width: 0;
+            padding: 0 10px;
+            border: 1.5px solid var(--border);
+            background: white;
+            cursor: pointer;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+
+        .add-btn {
+            flex: 0 0 110px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .add-btn:active {
+            transform: scale(0.98);
+        }
+
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 4px 2px;
+        }
+
+        .clear-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            background: none;
+            color: var(--danger);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 14px 4px;
+            border-bottom: 1px solid var(--row-border);
+        }
+
+        .item-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .item-check {
+            flex-shrink: 0;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .item-text {
+            min-width: 0;
+            font-size: 1rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+
+        .item.done {
+            opacity: 0.55;
+        }
+
+        .item.done .item-text {
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .meta-side {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .cat-badge {
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            background: none;
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            cursor: pointer;
+        }
+
+        .delete-btn:active {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .empty-state {
+            margin: 32px 0;
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        @media (min-width: 500px) {
+            body {
+                padding: 24px;
+            }
+            .add-form {
+                flex-direction: row;
+            }
+            .inputs-row {
+                flex: 1;
+            }
+            input {
+                flex: 1.4;
+            }
+            select {
+                flex: 1;
+            }
+            .add-btn {
+                flex: 0 0 90px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="app">
+        <div class="header-top">
+            <select id="lang-select" class="lang-select" aria-label="Language Selector">
+                <option value="he">עברית (Hebrew)</option>
+                <option value="en">English</option>
+                <option value="tr">Türkçe (Turkish)</option>
+            </select>
+        </div>
+
+        <h1 id="app-title">🛒 עגלת קניות חכמה</h1>
+        <div class="list-meta" id="list-meta">--</div>
+
+        <div id="summary-container"></div>
+
+        <form class="add-form" id="add-form">
+            <input
+                type="text"
+                id="item-input"
+                placeholder="מה להוסיף לעגלה?"
+                autocomplete="off"
+                required
+            >
+            <div class="inputs-row">
+                <select id="category-select"></select>
+                <button type="submit" class="add-btn" id="add-btn">הוסף</button>
+            </div>
+        </form>
+
+        <div class="actions-bar" id="actions-bar" hidden>
+            <span style="font-size: 0.85rem; color: var(--text-muted);" id="progress-info"></span>
+            <button type="button" class="clear-btn" id="clear-btn">
+                נקה פריטים שנקנו
+            </button>
+        </div>
+
+        <div id="list"></div>
+    </main>
+
+    <script>
+        "use strict";
+
+        const CURRENCY_SYMBOL = "₪";
+
+        const CATEGORIES = {
+            general:     { he: "כללי",            en: "General",             tr: "Genel" },
+            produce:     { he: "ירקות ופירות",    en: "Fruits & Vegetables", tr: "Meyve & Sebze" },
+            dairy:       { he: "מוצרי חלב",       en: "Dairy & Eggs",        tr: "Süt & Kahvaltılık" },
+            drinks:      { he: "שתייה",           en: "Drinks & Beverages",  tr: "İçecekler" },
+            canned:      { he: "שימורים",         en: "Canned Goods",        tr: "Konserve" },
+            bakery:      { he: "מאפייה",          en: "Bakery",              tr: "Fırın & Unlu Mamul" },
+            hygiene:     { he: "היגיינה",         en: "Personal Care",       tr: "Kişisel Bakım" },
+            meat:        { he: "בשר ודגים",       en: "Meat & Fish",         tr: "Et & Balık" },
+            snacks:      { he: "חטיפים ומתוקים",  en: "Snacks & Sweets",     tr: "Atıştırmalık & Tatlı" },
+            cleaning:    { he: "חומרי ניקוי",     en: "Cleaning Supplies",   tr: "Temizlik" },
+            electronics: { he: "אלקטרוניקה",      en: "Electronics",         tr: "Elektronik" },
+            tools:       { he: "כלי עבודה",       en: "Tools & Hardware",    tr: "Hırdavat & Aletler" }
+        };
+
+        const TRANSLATIONS = {
+            he: {
+                dir: "rtl",
+                title: "🛒 עגלת קניות חכמה",
+                lastUpdated: "עודכן לאחרונה:",
+                placeholder: "מה להוסיף לעגלה?",
+                addBtn: "הוסף",
+                clearCompleted: "נקה פריטים שנקנו",
+                emptyList: "העגלה ריקה. זמן לקניות! 🛍️",
+                progress: (done, total) => `נקנו ${done} מתוך ${total} פריטים`,
+                totalCostTitle: "סכום הקנייה לתשלום:",
+                editCost: "ערוך סכום",
+                deleteTitle: "מחק פריט",
+                promptNewCategory: "הזן שם לקטגוריה החדשה:",
+                promptAllDone: "כל הפריטים סומנו בעגלה! 🛒\nכמה יצא סכום הקנייה הכולל בשקלים (₪)?",
+                promptChangeCategory: (name, list) => `שנה קטגוריה עבור "${name}":\n\nאפשרויות קיימות: ${list}\nאו הקלד קטגוריה חדשה:`,
+                newCategoryOption: "➕ קטגוריה חדשה..."
+            },
+            en: {
+                dir: "ltr",
+                title: "🛒 Smart Shopping Cart",
+                lastUpdated: "Last updated:",
+                placeholder: "What would you like to buy?",
+                addBtn: "Add",
+                clearCompleted: "Clear completed",
+                emptyList: "Your cart is empty. Time to shop! 🛍️",
+                progress: (done, total) => `Completed ${done} of ${total} items`,
+                totalCostTitle: "Total checkout amount (ILS):",
+                editCost: "Edit amount",
+                deleteTitle: "Delete item",
+                promptNewCategory: "Enter new category name:",
+                promptAllDone: "All items completed! 🛒\nWhat is the total checkout amount in Shekels (₪)?",
+                promptChangeCategory: (name, list) => `Change category for "${name}":\n\nExisting categories: ${list}\nOr enter a new category:`,
+                newCategoryOption: "➕ New Category..."
+            },
+            tr: {
+                dir: "ltr",
+                title: "🛒 Akıllı Alışveriş Sepeti",
+                lastUpdated: "Son güncelleme:",
+                placeholder: "Sepete ne eklensin?",
+                addBtn: "Ekle",
+                clearCompleted: "Alınanları temizle",
+                emptyList: "Sepetiniz boş. Alışveriş zamanı! 🛍️",
+                progress: (done, total) => `${total} üründen ${done} tanesi alındı`,
+                totalCostTitle: "Toplam alışveriş tutarı (Şekel):",
+                editCost: "Tutarı düzenle",
+                deleteTitle: "Ürünü sil",
+                promptNewCategory: "Yeni kategori adını girin:",
+                promptAllDone: "Tüm ürünler sepete eklendi! 🛒\nToplam alışveriş tutarı nedir (₪)?",
+                promptChangeCategory: (name, list) => `"${name}" için kategoriyi değiştirin:\n\nMevcut kategoriler: ${list}\nVeya yeni bir kategori yazın:`,
+                newCategoryOption: "➕ Yeni Kategori..."
+            }
+        };
+
+        const STORAGE_KEY = "shopping_cart_data_v3";
+        let currentLang = localStorage.getItem("shopping_cart_lang") || "he";
+        let state = loadData();
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) {
+                    return {
+                        items: [],
+                        customCategories: {},
+                        totalCost: null,
+                        lastUpdated: getFormattedTime()
+                    };
+                }
+                const parsed = JSON.parse(saved);
+                const normalizedItems = (parsed.items || []).map(item => ({
+                    ...item,
+                    catKey: item.catKey || resolveCategoryToKey(item.cat || "general")
+                }));
+
+                return {
+                    items: normalizedItems,
+                    customCategories: parsed.customCategories || {},
+                    totalCost: parsed.totalCost ?? null,
+                    lastUpdated: parsed.lastUpdated || getFormattedTime()
+                };
+            } catch (error) {
+                console.error("Storage load error:", error);
+                return { items: [], customCategories: {}, totalCost: null, lastUpdated: getFormattedTime() };
+            }
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (error) {
+                console.error("Storage save error:", error);
+            }
+        }
+
+        function getFormattedTime() {
+            const locale = currentLang === "he" ? "he-IL" : currentLang === "tr" ? "tr-TR" : "en-US";
+            return new Date().toLocaleString(locale, { dateStyle: "short", timeStyle: "short" });
+        }
+
+        function resolveCategoryToKey(name) {
+            if (!name) return "general";
+            const trimmed = name.trim().toLowerCase();
+
+            for (const [key, translations] of Object.entries(CATEGORIES)) {
+                if (key.toLowerCase() === trimmed) return key;
+                if (Object.values(translations).some(t => t.toLowerCase() === trimmed)) {
+                    return key;
+                }
+            }
+
+            for (const [key, translations] of Object.entries(state.customCategories)) {
+                if (key.toLowerCase() === trimmed) return key;
+                if (Object.values(translations).some(t => t.toLowerCase() === trimmed)) {
+                    return key;
+                }
+            }
+
+            if (/(שתיה|שתייה|מים|קולה|מיץ|drink|drinks|water|juice|içecek|su|kola|meşrubat)/i.test(trimmed)) return "drinks";
+            if (/(בשר|עוף|דג|דגים|meat|chicken|fish|et|tavuk|balık)/i.test(trimmed)) return "meat";
+            if (/(ניקיון|חומרי ניקוי|clean|cleaning|temizlik)/i.test(trimmed)) return "cleaning";
+            if (/(חטיפים|ממתקים|snack|snacks|sweets|candy|atıştırmalık|cips|tatlı)/i.test(trimmed)) return "snacks";
+
+            const newKey = "custom_" + trimmed.replace(/\s+/g, "_");
+            if (!state.customCategories[newKey]) {
+                state.customCategories[newKey] = { he: name, en: name, tr: name };
+            }
+            return newKey;
+        }
+
+        function getCategoryLabel(key, lang = currentLang) {
+            if (CATEGORIES[key] && CATEGORIES[key][lang]) return CATEGORIES[key][lang];
+            if (state.customCategories[key] && state.customCategories[key][lang]) return state.customCategories[key][lang];
+            return CATEGORIES.general[lang];
+        }
+
+        const elements = {
+            langSelect: document.getElementById("lang-select"),
+            appTitle: document.getElementById("app-title"),
+            form: document.getElementById("add-form"),
+            input: document.getElementById("item-input"),
+            categorySelect: document.getElementById("category-select"),
+            addBtn: document.getElementById("add-btn"),
+            clearButton: document.getElementById("clear-btn"),
+            actionsBar: document.getElementById("actions-bar"),
+            progressInfo: document.getElementById("progress-info"),
+            listMeta: document.getElementById("list-meta"),
+            summaryContainer: document.getElementById("summary-container"),
+            list: document.getElementById("list")
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem("shopping_cart_lang", lang);
+            const t = TRANSLATIONS[lang];
+
+            document.documentElement.lang = lang;
+            document.documentElement.dir = t.dir;
+            elements.langSelect.value = lang;
+
+            elements.appTitle.textContent = t.title;
+            elements.input.placeholder = t.placeholder;
+            elements.addBtn.textContent = t.addBtn;
+            elements.clearButton.textContent = t.clearCompleted;
+
+            populateCategories();
+            saveAndRender();
+        }
+
+        function populateCategories() {
+            const t = TRANSLATIONS[currentLang];
+            const currentSelectedKey = elements.categorySelect.value || "general";
+            elements.categorySelect.innerHTML = "";
+
+            Object.keys(CATEGORIES).forEach(key => {
+                const opt = document.createElement("option");
+                opt.value = key;
+                opt.textContent = getCategoryLabel(key);
+                elements.categorySelect.appendChild(opt);
+            });
+
+            Object.keys(state.customCategories).forEach(key => {
+                const opt = document.createElement("option");
+                opt.value = key;
+                opt.textContent = getCategoryLabel(key);
+                elements.categorySelect.appendChild(opt);
+            });
+
+            const newOpt = document.createElement("option");
+            newOpt.value = "__new__";
+            newOpt.textContent = t.newCategoryOption;
+            elements.categorySelect.appendChild(newOpt);
+
+            if (Array.from(elements.categorySelect.options).some(o => o.value === currentSelectedKey)) {
+                elements.categorySelect.value = currentSelectedKey;
+            } else {
+                elements.categorySelect.value = "general";
+            }
+        }
+
+        function classifyItem(name) {
+            const n = name.toLowerCase();
+            if (/(מים|קולה|סודה|מיץ|בירה|יין|קפה|תה|משקה|שתיה|שתייה|water|coke|cola|soda|juice|beer|wine|coffee|tea|drink|beverage|su|kola|soda|meyve suyu|bira|şarap|kahve|çay|içecek|meşrubat)/.test(n)) return "drinks";
+            if (/(טונה|תירס|רסק|זיתים|מלפפון חמוץ|חומוס גרגרים|אפונה|שימורים|tuna|corn|canned|olive|olives|peas|konserve|ton balığı|mısır|zeytin|salça|bezelye)/.test(n)) return "canned";
+            if (/(חלב|גבינה|יוגורט|ביצים|ביצה|קוטג|חמאה|שמנת|milk|cheese|yogurt|egg|eggs|butter|cream|süt|peynir|yoğurt|yumurta|tereyağı|kaymak)/.test(n)) return "dairy";
+            if (/(עגבניה|מלפפון|בצל|תפוח|בננה|גזר|חסה|פטרוזיליה|תות|ענבים|פרי|ירק|תפוח אדמה|לימון|tomato|cucumber|onion|apple|banana|carrot|lettuce|strawberry|grape|fruit|potato|lemon|domates|salatalık|soğan|elma|muz|havuç|marul|çilek|üzüm|patates|limon)/.test(n)) return "produce";
+            if (/(לחם|פיתה|עוגה|לחמניה|באגט|קוראסון|רוגלך|bread|pita|cake|baguette|croissant|cookie|cookies|ekmek|pasta|börek|simit|kruvasan|kek)/.test(n)) return "bakery";
+            if (/(בשר|עוף|שניצל|סטייק|טחון|סלמון|דג|meat|chicken|steak|beef|salmon|fish|et|tavuk|köfte|balık|biftek)/.test(n)) return "meat";
+            if (/(שוקולד|חטיף|במבה|ביסלי|ציפס|סוכריות|עוגיות|snack|chocolate|chips|candy|sweets|çikolata|cips|şeker|gofret|atıştırmalık)/.test(n)) return "snacks";
+            if (/(סבון|שמפו|משחת שיניים|נייר|מגבונים|דאודורנט|מרכך|soap|shampoo|toothpaste|paper|wipes|deodorant|conditioner|sabun|şampuan|diş macunu|peçete|ıslak mendil|deodorant|saç kremi)/.test(n)) return "hygiene";
+            if (/(אקונומיקה|נוזל כלים|ספוג|מרכך כביסה|טבליות|bleach|detergent|sponge|cleaning|çamaşır suyu|bulaşık deterjanı|sünger|deterjan)/.test(n)) return "cleaning";
+            if (/(מחשב|לפטופ|מסך|מקלדת|עכבר|אוזניות|טלפון|מטען|כבל|סוללה|laptop|computer|monitor|screen|keyboard|mouse|headphones|phone|charger|cable|battery|bilgisayar|klavye|fare|kulaklık|telefon|şarj|kablo|pil)/.test(n)) return "electronics";
+            if (/(מברג|פטיש|מקדחה|כלי עבודה|מסמר|בורג|screwdriver|hammer|drill|nail|screw|wrench|tornavida|çekiç|matkap|vida|çivi|alet)/.test(n)) return "tools";
+            return "general";
+        }
+
+        function autoClassify() {
+            const name = elements.input.value.trim();
+            if (!name) {
+                elements.categorySelect.value = "general";
+                return;
+            }
+            elements.categorySelect.value = classifyItem(name);
+        }
+
+        function handleCustomCategory() {
+            if (elements.categorySelect.value !== "__new__") return;
+            const t = TRANSLATIONS[currentLang];
+
+            const customName = prompt(t.promptNewCategory);
+            if (!customName || !customName.trim()) {
+                elements.categorySelect.value = "general";
+                return;
+            }
+
+            const catKey = resolveCategoryToKey(customName.trim());
+            populateCategories();
+            elements.categorySelect.value = catKey;
+            saveData();
+        }
+
+        function createId() {
+            return Date.now() + Math.random();
+        }
+
+        function updateTimestamp() {
+            state.lastUpdated = getFormattedTime();
+        }
+
+        function addItem() {
+            const name = elements.input.value.trim();
+            if (!name) return;
+
+            const categoryKey = elements.categorySelect.value === "__new__" ? "general" : elements.categorySelect.value;
+            
+            state.items.push({
+                id: createId(),
+                name,
+                catKey: categoryKey,
+                done: false
+            });
+
+            updateTimestamp();
+            elements.input.value = "";
+            elements.categorySelect.value = "general";
+
+            saveAndRender();
+            elements.input.focus();
+        }
+
+        function toggleItem(id) {
+            const prevDoneCount = state.items.filter(i => i.done).length;
+
+            state.items = state.items.map(item =>
+                item.id === id ? { ...item, done: !item.done } : item
+            );
+
+            updateTimestamp();
+            saveAndRender();
+
+            const allDone = state.items.length > 0 && state.items.every(i => i.done);
+            if (allDone && prevDoneCount !== state.items.length) {
+                setTimeout(promptTotalCost, 200);
+            }
+        }
+
+        function promptTotalCost() {
+            const t = TRANSLATIONS[currentLang];
+            const amount = prompt(t.promptAllDone, state.totalCost || "");
+            if (amount !== null && amount.trim() !== "") {
+                const numeric = parseFloat(amount.replace(/[^\d.]/g, ""));
+                if (!isNaN(numeric)) {
+                    state.totalCost = numeric;
+                    saveAndRender();
+                }
+            }
+        }
+
+        function deleteItem(id) {
+            state.items = state.items.filter(item => item.id !== id);
+            if (state.items.length === 0) state.totalCost = null;
+            updateTimestamp();
+            saveAndRender();
+        }
+
+        function clearCompleted() {
+            state.items = state.items.filter(item => !item.done);
+            if (state.items.length === 0) state.totalCost = null;
+            updateTimestamp();
+            saveAndRender();
+        }
+
+        function changeCategory(id) {
+            const currentItem = state.items.find(item => item.id === id);
+            if (!currentItem) return;
+
+            const t = TRANSLATIONS[currentLang];
+            const currentCatName = getCategoryLabel(currentItem.catKey);
+            const availableOptions = Array.from(elements.categorySelect.options)
+                .map(o => o.textContent)
+                .filter(txt => txt !== t.newCategoryOption);
+
+            const userInput = prompt(
+                t.promptChangeCategory(currentItem.name, availableOptions.join(", ")),
+                currentCatName
+            );
+
+            if (!userInput || !userInput.trim()) return;
+
+            const newKey = resolveCategoryToKey(userInput.trim());
+            currentItem.catKey = newKey;
+
+            updateTimestamp();
+            populateCategories();
+            saveAndRender();
+        }
+
+        function saveAndRender() {
+            saveData();
+            render();
+        }
+
+        function render() {
+            const t = TRANSLATIONS[currentLang];
+            elements.listMeta.textContent = `${t.lastUpdated} ${state.lastUpdated}`;
+
+            if (state.totalCost !== null) {
+                elements.summaryContainer.innerHTML = `
+                    <div class="summary-card">
+                        <div>
+                            <span class="summary-title">${t.totalCostTitle}</span>
+                            <button type="button" class="edit-cost-btn" id="edit-cost-btn">${t.editCost}</button>
+                        </div>
+                        <div class="summary-cost">${CURRENCY_SYMBOL}${state.totalCost.toLocaleString()}</div>
+                    </div>
+                `;
+                document.getElementById("edit-cost-btn").addEventListener("click", promptTotalCost);
+            } else {
+                elements.summaryContainer.innerHTML = "";
+            }
+
+            const doneCount = state.items.filter(i => i.done).length;
+            const totalCount = state.items.length;
+
+            if (totalCount > 0) {
+                elements.actionsBar.hidden = false;
+                elements.progressInfo.textContent = t.progress(doneCount, totalCount);
+            } else {
+                elements.actionsBar.hidden = true;
+            }
+
+            const sortedItems = [...state.items].sort((a, b) => Number(a.done) - Number(b.done));
+
+            if (sortedItems.length === 0) {
+                elements.list.innerHTML = `<p class="empty-state">${t.emptyList}</p>`;
+                return;
+            }
+
+            elements.list.innerHTML = sortedItems
+                .map(item => `
+                    <div class="item ${item.done ? "done" : ""}" data-id="${item.id}">
+                        <div class="item-content" data-action="toggle" role="button" tabindex="0">
+                            <span class="item-check">${item.done ? "✅" : "⬜"}</span>
+                            <span class="item-text">${escapeHTML(item.name)}</span>
+                        </div>
+
+                        <div class="meta-side">
+                            <span class="cat-badge" data-action="category" role="button" tabindex="0">
+                                ${escapeHTML(getCategoryLabel(item.catKey))}
+                            </span>
+                            <button type="button" class="delete-btn" data-action="delete" title="${t.deleteTitle}">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `)
+                .join("");
+        }
+
+        function escapeHTML(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        elements.langSelect.addEventListener("change", e => setLanguage(e.target.value));
+        elements.form.addEventListener("submit", e => {
+            e.preventDefault();
+            addItem();
+        });
+        elements.input.addEventListener("input", autoClassify);
+        elements.categorySelect.addEventListener("change", handleCustomCategory);
+        elements.clearButton.addEventListener("click", clearCompleted);
+
+        elements.list.addEventListener("click", e => {
+            const actionEl = e.target.closest("[data-action]");
+            if (!actionEl) return;
+
+            const itemEl = actionEl.closest(".item");
+            if (!itemEl) return;
+
+            const id = Number(itemEl.dataset.id);
+            const action = actionEl.dataset.action;
+
+            if (action === "toggle") toggleItem(id);
+            if (action === "category") changeCategory(id);
+            if (action === "delete") deleteItem(id);
+        });
+
+        setLanguage(currentLang);
+    </script>
+</body>
+</html>
