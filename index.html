@@ -577,7 +577,6 @@
 
 <body>
     <div class="phone-wrapper">
-        <!-- Top App Bar -->
         <header>
             <div class="header-top">
                 <div class="header-tools">
@@ -589,7 +588,6 @@
                 </div>
             </div>
 
-            <!-- Tabs -->
             <div class="tabs">
                 <button class="tab-btn active" id="tab-cart" title="Shopping Cart">🛒</button>
                 <button class="tab-btn" id="tab-history" title="History">🕒</button>
@@ -1083,7 +1081,22 @@
                 return;
             }
 
-            const sorted = [...state.items].sort((a, b) => Number(a.done) - Number(b.done));
+            const categoryOrder = Object.keys(CATEGORIES);
+            const sorted = [...state.items].sort((a, b) => {
+                if (Number(a.done) !== Number(b.done)) {
+                    return Number(a.done) - Number(b.done);
+                }
+                const orderA = categoryOrder.indexOf(a.catKey);
+                const orderB = categoryOrder.indexOf(b.catKey);
+                const safeOrderA = orderA === -1 ? 999 : orderA;
+                const safeOrderB = orderB === -1 ? 999 : orderB;
+
+                if (safeOrderA !== safeOrderB) {
+                    return safeOrderA - safeOrderB;
+                }
+                return 0;
+            });
+
             els.itemsList.innerHTML = sorted.map(item => {
                 const cat = CATEGORIES[item.catKey] || CATEGORIES.other;
                 return `
