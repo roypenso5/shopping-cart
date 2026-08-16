@@ -2,87 +2,227 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Smart Shopping List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Shopping Cart</title>
 
     <style>
         :root {
-            --primary: #8b5cf6;
-            --primary-hover: #7c3aed;
+            --primary: #334155;
+            --primary-light: #475569;
+            --primary-dark: #1e293b;
+            --accent: #94a3b8;
             --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface-subtle: #f1f5f9;
             --text: #0f172a;
             --text-muted: #64748b;
+            --border: #e2e8f0;
             --danger: #ef4444;
             --success: #10b981;
-            --border: #cbd5e1;
-            --surface: #ffffff;
-            --row-border: #f1f5f9;
+            --modal-backdrop: rgba(15, 23, 42, 0.65);
+            --card-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --primary: #1e293b;
+            --primary-light: #334155;
+            --primary-dark: #0f172a;
+            --accent: #cbd5e1;
+            --bg: #0b0f17;
+            --surface: #131b26;
+            --surface-subtle: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #283548;
+            --modal-backdrop: rgba(0, 0, 0, 0.8);
+            --card-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.4);
         }
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             -webkit-tap-highlight-color: transparent;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            padding: 12px;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
+            padding-bottom: 30px;
         }
 
-        button, input, select {
-            font: inherit;
-        }
-
-        .app {
+        .phone-wrapper {
             width: 100%;
-            max-width: 540px;
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-            align-self: flex-start;
+            max-width: 480px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--surface);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Top Header */
+        header {
+            background-color: var(--primary);
+            color: #ffffff;
+            padding: 14px 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            border-bottom: 1px solid var(--border);
         }
 
         .header-top {
             display: flex;
-            justify-content: flex-end;
-            margin-bottom: 6px;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
         }
 
-        .lang-select {
-            padding: 6px 12px;
-            font-size: 0.9rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: #fff;
+        .header-tools {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 1.2rem;
             cursor: pointer;
-            outline: none;
+            padding: 6px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
         }
 
-        h1 {
-            margin: 0 0 6px;
-            font-size: 1.6rem;
-            color: var(--text);
-            text-align: center;
+        .icon-btn:active {
+            background-color: rgba(255, 255, 255, 0.15);
         }
 
-        .list-meta {
-            text-align: center;
+        .lang-btn {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            padding: 4px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 6px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 0;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #ffffff;
+        }
+
+        .tab-btn.active::after {
+            content: "";
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--accent);
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Main Container */
+        main {
+            flex: 1;
+            padding: 16px;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* View: Cart */
+        .meta-text {
             font-size: 0.8rem;
             color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .add-input-bar {
+            display: flex;
+            gap: 8px;
             margin-bottom: 16px;
         }
 
+        .add-input-bar input {
+            flex: 1;
+            height: 48px;
+            padding: 0 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            background: var(--surface);
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+
+        .add-input-bar input:focus {
+            border-color: var(--primary-light);
+        }
+
+        .btn-open-category {
+            height: 48px;
+            padding: 0 16px;
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .btn-open-category:active {
+            transform: scale(0.97);
+            background-color: var(--primary-light);
+        }
+
+        /* Total Banner */
         .summary-card {
-            background: #ecfdf5;
-            border: 1px solid #a7f3d0;
-            border-radius: 10px;
+            background-color: var(--surface-subtle);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             padding: 12px 16px;
             margin-bottom: 16px;
             display: flex;
@@ -91,113 +231,59 @@
         }
 
         .summary-title {
-            color: #065f46;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            color: var(--text);
         }
 
         .summary-cost {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #047857;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text);
         }
 
-        .edit-cost-btn {
+        .summary-action-btn {
             background: none;
             border: none;
-            color: #059669;
-            cursor: pointer;
             text-decoration: underline;
-            font-size: 0.85rem;
-            margin: 0 6px;
-            padding: 4px;
-        }
-
-        .add-form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            margin-bottom: 18px;
-        }
-
-        .inputs-row {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-        }
-
-        input, select, .add-btn {
-            height: 48px;
-            border-radius: 10px;
-            font-size: 1rem; /* 16px prevents iOS browser auto-zoom */
-            outline: none;
-        }
-
-        input {
-            width: 100%;
-            padding: 0 14px;
-            border: 1.5px solid var(--border);
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        select {
-            flex: 1;
-            min-width: 0;
-            padding: 0 10px;
-            border: 1.5px solid var(--border);
-            background: white;
+            color: var(--text-muted);
             cursor: pointer;
+            font-size: 0.8rem;
+            margin-inline-start: 6px;
         }
 
-        input:focus, select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
-        }
-
-        .add-btn {
-            flex: 0 0 110px;
-            border: none;
-            background: var(--primary);
-            color: white;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s, transform 0.1s;
-        }
-
-        .add-btn:active {
-            transform: scale(0.98);
-        }
-
+        /* Actions Bar */
         .actions-bar {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            justify-content: space-between;
             padding: 4px 2px;
-        }
-
-        .clear-btn {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 6px;
-            background: none;
-            color: var(--danger);
+            margin-bottom: 12px;
             font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
+            color: var(--text-muted);
         }
 
-        .item {
+        .btn-clear {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 4px 6px;
+        }
+
+        /* Items List */
+        .item-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 8px;
-            padding: 14px 4px;
-            border-bottom: 1px solid var(--row-border);
+            padding: 14px 8px;
+            border-bottom: 1px solid var(--border);
+            transition: opacity 0.2s;
         }
 
-        .item-content {
+        .item-main {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -207,589 +293,881 @@
             user-select: none;
         }
 
-        .item-check {
-            flex-shrink: 0;
-            font-size: 1.25rem;
+        .item-checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
             display: flex;
             align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            transition: all 0.2s;
         }
 
-        .item-text {
-            min-width: 0;
+        .item-row.done .item-checkbox {
+            background-color: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+
+        .item-row.done .item-name {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .item-name {
             font-size: 1rem;
+            font-weight: 500;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            line-height: 1.4;
         }
 
-        .item.done {
-            opacity: 0.55;
-        }
-
-        .item.done .item-text {
-            color: var(--text-muted);
-            text-decoration: line-through;
-        }
-
-        .meta-side {
+        .item-meta {
             display: flex;
             align-items: center;
             gap: 8px;
             flex-shrink: 0;
         }
 
-        .cat-badge {
-            padding: 6px 10px;
+        .category-chip {
+            padding: 4px 10px;
             border-radius: 8px;
-            background: #f1f5f9;
-            color: #334155;
             font-size: 0.75rem;
             font-weight: 600;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-
-        .delete-btn {
+            background: var(--surface-subtle);
+            color: var(--text);
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border: none;
-            border-radius: 8px;
+            gap: 4px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .btn-delete {
             background: none;
+            border: none;
             color: var(--text-muted);
             font-size: 1.15rem;
             cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .delete-btn:active {
-            background: #fee2e2;
+        .btn-delete:active {
             color: var(--danger);
+            background: #fee2e2;
         }
 
-        .empty-state {
-            margin: 32px 0;
-            color: var(--text-muted);
+        /* Empty States */
+        .empty-box {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 40px 20px;
             text-align: center;
-            font-size: 0.95rem;
+            margin: 24px 0;
         }
 
-        @media (min-width: 500px) {
-            body {
-                padding: 24px;
-            }
-            .add-form {
-                flex-direction: row;
-            }
-            .inputs-row {
-                flex: 1;
-            }
-            input {
-                flex: 1.4;
-            }
-            select {
-                flex: 1;
-            }
-            .add-btn {
-                flex: 0 0 90px;
-            }
+        .empty-icon {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+            opacity: 0.8;
+        }
+
+        .empty-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .empty-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* View: History Cards */
+        .history-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .history-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .history-card-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .history-amount {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .history-items-preview {
+            font-size: 0.85rem;
+            color: var(--text);
+            line-height: 1.4;
+        }
+
+        /* Modal: Category Selector */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: var(--modal-backdrop);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--surface);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95);
+            transition: transform 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .modal-overlay.open .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            background-color: var(--primary);
+            color: #ffffff;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .modal-item-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: var(--surface-subtle);
+            border: 1px solid var(--border);
+            margin-bottom: 18px;
+            word-break: break-word;
+        }
+
+        /* 2-Column Category Grid */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .category-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .category-btn.selected {
+            border-color: var(--primary-light);
+            background-color: var(--surface-subtle);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .category-btn span.icon {
+            font-size: 1.25rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .modal-btn-confirm {
+            flex: 1;
+            height: 46px;
+            border: none;
+            border-radius: 10px;
+            background-color: var(--primary);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .modal-btn-cancel {
+            flex: 1;
+            height: 46px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
         }
     </style>
 </head>
 
 <body>
-    <main class="app">
-        <div class="header-top">
-            <select id="lang-select" class="lang-select" aria-label="Language Selector">
-                <option value="he">עברית (Hebrew)</option>
-                <option value="en">English</option>
-                <option value="tr">Türkçe (Turkish)</option>
-            </select>
-        </div>
-
-        <h1 id="app-title">🛒 עגלת קניות חכמה</h1>
-        <div class="list-meta" id="list-meta">--</div>
-
-        <div id="summary-container"></div>
-
-        <form class="add-form" id="add-form">
-            <input
-                type="text"
-                id="item-input"
-                placeholder="מה להוסיף לעגלה?"
-                autocomplete="off"
-                required
-            >
-            <div class="inputs-row">
-                <select id="category-select"></select>
-                <button type="submit" class="add-btn" id="add-btn">הוסף</button>
+    <div class="phone-wrapper">
+        <!-- Top App Bar -->
+        <header>
+            <div class="header-top">
+                <div class="header-tools">
+                    <button class="icon-btn" id="theme-btn" title="Toggle Theme">🌙</button>
+                    <button class="icon-btn lang-btn" id="lang-btn">EN</button>
+                </div>
+                <div class="header-tools">
+                    <button class="icon-btn" id="finish-cart-btn" title="Complete List">🛒✓</button>
+                </div>
             </div>
-        </form>
 
-        <div class="actions-bar" id="actions-bar" hidden>
-            <span style="font-size: 0.85rem; color: var(--text-muted);" id="progress-info"></span>
-            <button type="button" class="clear-btn" id="clear-btn">
-                נקה פריטים שנקנו
-            </button>
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" id="tab-cart" title="Shopping Cart">🛒</button>
+                <button class="tab-btn" id="tab-history" title="History">🕒</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- View 1: Active Cart -->
+            <section id="view-cart" class="view-section active">
+                <div class="meta-text" id="list-meta">--</div>
+
+                <div id="summary-container"></div>
+
+                <form class="add-input-bar" id="add-form">
+                    <input type="text" id="item-input" placeholder="מה להוסיף לעגלה?" autocomplete="off" required>
+                    <button type="submit" class="btn-open-category" id="btn-add-item">
+                        <span>+</span>
+                        <span id="txt-add">הוסף</span>
+                    </button>
+                </form>
+
+                <div class="actions-bar" id="actions-bar" hidden>
+                    <span id="progress-info">0 פריטים</span>
+                    <button type="button" class="btn-clear" id="btn-clear-done">נקה שנקנו</button>
+                </div>
+
+                <div id="items-list"></div>
+            </section>
+
+            <!-- View 2: History -->
+            <section id="view-history" class="view-section">
+                <div class="actions-bar" id="history-actions-bar" style="display: none;">
+                    <span id="history-count-info">0 רכישות</span>
+                    <button type="button" class="btn-clear" id="btn-clear-all-history">נקה את כל ההיסטוריה</button>
+                </div>
+                <div id="history-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Category Assign Modal -->
+    <div class="modal-overlay" id="category-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title-text">שיוך לקטגוריה</div>
+                <button class="icon-btn" id="modal-close-x">✕</button>
+            </div>
+            <div class="modal-body">
+                <span class="modal-label" id="modal-lbl-item">שם המוצר</span>
+                <div class="modal-item-name" id="modal-item-name-preview">--</div>
+
+                <span class="modal-label" id="modal-lbl-cat">קטגוריה</span>
+                <div class="category-grid" id="category-grid"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn-cancel" id="modal-btn-cancel">ביטול</button>
+                <button type="button" class="modal-btn-confirm" id="modal-btn-confirm">הוספה לרשימה</button>
+            </div>
         </div>
-
-        <div id="list"></div>
-    </main>
+    </div>
 
     <script>
         "use strict";
 
-        const CURRENCY_SYMBOL = "₪";
+        const CURRENCY = "₪";
 
         const CATEGORIES = {
-            general:     { he: "כללי",            en: "General",             tr: "Genel" },
-            produce:     { he: "ירקות ופירות",    en: "Fruits & Vegetables", tr: "Meyve & Sebze" },
-            dairy:       { he: "מוצרי חלב",       en: "Dairy & Eggs",        tr: "Süt & Kahvaltılık" },
-            drinks:      { he: "שתייה",           en: "Drinks & Beverages",  tr: "İçecekler" },
-            canned:      { he: "שימורים",         en: "Canned Goods",        tr: "Konserve" },
-            bakery:      { he: "מאפייה",          en: "Bakery",              tr: "Fırın & Unlu Mamul" },
-            hygiene:     { he: "היגיינה",         en: "Personal Care",       tr: "Kişisel Bakım" },
-            meat:        { he: "בשר ודגים",       en: "Meat & Fish",         tr: "Et & Balık" },
-            snacks:      { he: "חטיפים ומתוקים",  en: "Snacks & Sweets",     tr: "Atıştırmalık & Tatlı" },
-            cleaning:    { he: "חומרי ניקוי",     en: "Cleaning Supplies",   tr: "Temizlik" },
-            electronics: { he: "אלקטרוניקה",      en: "Electronics",         tr: "Elektronik" },
-            tools:       { he: "כלי עבודה",       en: "Tools & Hardware",    tr: "Hırdavat & Aletler" }
+            produce:     { icon: "🥕", he: "ירקות ופירות",    en: "Produce",            tr: "Meyve & Sebze" },
+            dairy:       { icon: "🥛", he: "מוצרי חלב וביצים", en: "Dairy & Eggs",       tr: "Süt & Yumurta" },
+            meat:        { icon: "🥩", he: "בשר ודגים",       en: "Meat & Fish",        tr: "Et & Balık" },
+            bakery:      { icon: "🥐", he: "מאפים ולחם",      en: "Bakery & Bread",     tr: "Fırın & Ekmek" },
+            canned:      { icon: "📦", he: "שימורים ויבשים",  en: "Canned & Dry Goods", tr: "Konserve & Kuru" },
+            frozen:      { icon: "❄️", he: "קפואים",          en: "Frozen Foods",       tr: "Dondurulmuş" },
+            drinks:      { icon: "🧃", he: "משקאות",          en: "Beverages",          tr: "İçecekler" },
+            snacks:      { icon: "🍬", he: "חטיפים ומתוקים",  en: "Snacks & Sweets",    tr: "Atıştırmalık" },
+            hygiene:     { icon: "🧴", he: "ניקיון וטואלטיקה", en: "Care & Cleaning",    tr: "Temizlik & Bakım" },
+            other:       { icon: "🧺", he: "אחר",             en: "Other",              tr: "Diğer" }
         };
 
         const TRANSLATIONS = {
             he: {
                 dir: "rtl",
-                title: "🛒 עגלת קניות חכמה",
-                lastUpdated: "עודכן לאחרונה:",
+                langCode: "HE",
                 placeholder: "מה להוסיף לעגלה?",
                 addBtn: "הוסף",
-                clearCompleted: "נקה פריטים שנקנו",
-                emptyList: "העגלה ריקה. זמן לקניות! 🛍️",
-                progress: (done, total) => `נקנו ${done} מתוך ${total} פריטים`,
-                totalCostTitle: "סכום הקנייה לתשלום:",
-                editCost: "ערוך סכום",
-                deleteTitle: "מחק פריט",
-                promptNewCategory: "הזן שם לקטגוריה החדשה:",
-                promptAllDone: "כל הפריטים סומנו בעגלה! 🛒\nכמה יצא סכום הקנייה הכולל בשקלים (₪)?",
-                promptChangeCategory: (name, list) => `שנה קטגוריה עבור "${name}":\n\nאפשרויות קיימות: ${list}\nאו הקלד קטגוריה חדשה:`,
-                newCategoryOption: "➕ קטגוריה חדשה..."
+                lastUpdated: "עודכן לאחרונה:",
+                clearDone: "נקה שנקנו",
+                progress: (d, t) => `${d} מתוך ${t} נאספו`,
+                emptyCartTitle: "העגלה שלך ריקה",
+                emptyCartDesc: "הוסף פריטים בעזרת תיבת הטקסט למעלה",
+                emptyHistoryTitle: "עדיין אין קניות שהושלמו",
+                emptyHistoryDesc: "בסיום הרשימה הראשונה, הקנייה תופיע כאן עם הסכום שלה.",
+                totalTitle: "סכום לתשלום:",
+                editAmount: "ערוך סכום",
+                modalTitleAdd: "שיוך לקטגוריה",
+                modalTitleEdit: "שינוי קטגוריה",
+                modalItemLbl: "שם המוצר",
+                modalCatLbl: "קטגוריה",
+                modalCancel: "ביטול",
+                modalConfirmAdd: "הוספה לרשימה",
+                modalConfirmEdit: "שמור שינוי",
+                promptTotalDone: "כל הפריטים סומנו! 🛒\nכמה יצא סכום הקנייה בשקלים (₪)?",
+                historyItemsCount: (c) => `${c} מוצרים`,
+                clearAllHistory: "נקה את כל ההיסטוריה",
+                historySummaryCount: (c) => `${c} רכישות נשמרו`,
+                confirmClearAllHistory: "האם אתה בטוח שברצונך למחוק את כל היסטוריית הקניות?"
             },
             en: {
                 dir: "ltr",
-                title: "🛒 Smart Shopping Cart",
-                lastUpdated: "Last updated:",
-                placeholder: "What would you like to buy?",
+                langCode: "EN",
+                placeholder: "What to buy today?",
                 addBtn: "Add",
-                clearCompleted: "Clear completed",
-                emptyList: "Your cart is empty. Time to shop! 🛍️",
-                progress: (done, total) => `Completed ${done} of ${total} items`,
-                totalCostTitle: "Total checkout amount (ILS):",
-                editCost: "Edit amount",
-                deleteTitle: "Delete item",
-                promptNewCategory: "Enter new category name:",
-                promptAllDone: "All items completed! 🛒\nWhat is the total checkout amount in Shekels (₪)?",
-                promptChangeCategory: (name, list) => `Change category for "${name}":\n\nExisting categories: ${list}\nOr enter a new category:`,
-                newCategoryOption: "➕ New Category..."
+                lastUpdated: "Last updated:",
+                clearDone: "Clear purchased",
+                progress: (d, t) => `${d} of ${t} collected`,
+                emptyCartTitle: "Your cart is empty",
+                emptyCartDesc: "Add items using the input box above",
+                emptyHistoryTitle: "No completed orders yet",
+                emptyHistoryDesc: "When you complete a shopping list, it will appear here with the total amount.",
+                totalTitle: "Checkout total:",
+                editAmount: "Edit",
+                modalTitleAdd: "Assign Category",
+                modalTitleEdit: "Change Category",
+                modalItemLbl: "Item Name",
+                modalCatLbl: "Category",
+                modalCancel: "Cancel",
+                modalConfirmAdd: "Add to list",
+                modalConfirmEdit: "Save changes",
+                promptTotalDone: "All items checked! 🛒\nWhat is the total amount in Shekels (₪)?",
+                historyItemsCount: (c) => `${c} items`,
+                clearAllHistory: "Clear all history",
+                historySummaryCount: (c) => `${c} purchases saved`,
+                confirmClearAllHistory: "Are you sure you want to clear all shopping history?"
             },
             tr: {
                 dir: "ltr",
-                title: "🛒 Akıllı Alışveriş Sepeti",
-                lastUpdated: "Son güncelleme:",
+                langCode: "TR",
                 placeholder: "Sepete ne eklensin?",
                 addBtn: "Ekle",
-                clearCompleted: "Alınanları temizle",
-                emptyList: "Sepetiniz boş. Alışveriş zamanı! 🛍️",
-                progress: (done, total) => `${total} üründen ${done} tanesi alındı`,
-                totalCostTitle: "Toplam alışveriş tutarı (Şekel):",
-                editCost: "Tutarı düzenle",
-                deleteTitle: "Ürünü sil",
-                promptNewCategory: "Yeni kategori adını girin:",
-                promptAllDone: "Tüm ürünler sepete eklendi! 🛒\nToplam alışveriş tutarı nedir (₪)?",
-                promptChangeCategory: (name, list) => `"${name}" için kategoriyi değiştirin:\n\nMevcut kategoriler: ${list}\nVeya yeni bir kategori yazın:`,
-                newCategoryOption: "➕ Yeni Kategori..."
+                lastUpdated: "Son güncelleme:",
+                clearDone: "Alınanları temizle",
+                progress: (d, t) => `${t} üründen ${d} tanesi alındı`,
+                emptyCartTitle: "Sepetiniz boş",
+                emptyCartDesc: "Yukarıdaki kutuyu kullanarak ürün ekleyin",
+                emptyHistoryTitle: "Henüz tamamlanmış alışveriş yok",
+                emptyHistoryDesc: "Alışverişi tamamladığınızda, harcama tutarı ile burada görünecektir.",
+                totalTitle: "Toplam Tutar:",
+                editAmount: "Düzenle",
+                modalTitleAdd: "Kategori Seçimi",
+                modalTitleEdit: "Kategoriyi Değiştir",
+                modalItemLbl: "Ürün Adı",
+                modalCatLbl: "Kategori",
+                modalCancel: "İptal",
+                modalConfirmAdd: "Listeye Ekle",
+                modalConfirmEdit: "Kaydet",
+                promptTotalDone: "Tüm ürünler tamamlandı! 🛒\nToplam alışveriş tutarı nedir (₪)?",
+                historyItemsCount: (c) => `${c} ürün`,
+                clearAllHistory: "Tüm geçmişi temizle",
+                historySummaryCount: (c) => `${c} alışveriş kaydedildi`,
+                confirmClearAllHistory: "Tüm alışveriş geçmişini silmek istediğinizden emin misiniz?"
             }
         };
 
-        const STORAGE_KEY = "shopping_cart_data_v3";
-        let currentLang = localStorage.getItem("shopping_cart_lang") || "he";
-        let state = loadData();
+        const STORAGE_KEY = "smart_cart_v5";
+        let currentLang = detectLanguage();
+        let state = loadState();
+        let pendingItem = { name: "", catKey: "other", editingId: null };
 
-        function loadData() {
+        function loadState() {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
-                if (!saved) {
-                    return {
-                        items: [],
-                        customCategories: {},
-                        totalCost: null,
-                        lastUpdated: getFormattedTime()
-                    };
-                }
+                if (!saved) return { items: [], history: [], totalCost: null, lastUpdated: getTimeStr() };
                 const parsed = JSON.parse(saved);
-                const normalizedItems = (parsed.items || []).map(item => ({
-                    ...item,
-                    catKey: item.catKey || resolveCategoryToKey(item.cat || "general")
-                }));
-
                 return {
-                    items: normalizedItems,
-                    customCategories: parsed.customCategories || {},
+                    items: Array.isArray(parsed.items) ? parsed.items : [],
+                    history: Array.isArray(parsed.history) ? parsed.history : [],
                     totalCost: parsed.totalCost ?? null,
-                    lastUpdated: parsed.lastUpdated || getFormattedTime()
+                    lastUpdated: parsed.lastUpdated || getTimeStr()
                 };
-            } catch (error) {
-                console.error("Storage load error:", error);
-                return { items: [], customCategories: {}, totalCost: null, lastUpdated: getFormattedTime() };
+            } catch (e) {
+                return { items: [], history: [], totalCost: null, lastUpdated: getTimeStr() };
             }
         }
 
-        function saveData() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            } catch (error) {
-                console.error("Storage save error:", error);
-            }
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         }
 
-        function getFormattedTime() {
-            const locale = currentLang === "he" ? "he-IL" : currentLang === "tr" ? "tr-TR" : "en-US";
-            return new Date().toLocaleString(locale, { dateStyle: "short", timeStyle: "short" });
+        function detectLanguage() {
+            const saved = localStorage.getItem("cart_lang");
+            if (saved && ["he", "en", "tr"].includes(saved)) return saved;
+            const b = (navigator.language || "").toLowerCase();
+            if (b.startsWith("he") || b.startsWith("iw")) return "he";
+            if (b.startsWith("tr")) return "tr";
+            return "en";
         }
 
-        function resolveCategoryToKey(name) {
-            if (!name) return "general";
-            const trimmed = name.trim().toLowerCase();
-
-            for (const [key, translations] of Object.entries(CATEGORIES)) {
-                if (key.toLowerCase() === trimmed) return key;
-                if (Object.values(translations).some(t => t.toLowerCase() === trimmed)) {
-                    return key;
-                }
-            }
-
-            for (const [key, translations] of Object.entries(state.customCategories)) {
-                if (key.toLowerCase() === trimmed) return key;
-                if (Object.values(translations).some(t => t.toLowerCase() === trimmed)) {
-                    return key;
-                }
-            }
-
-            if (/(שתיה|שתייה|מים|קולה|מיץ|drink|drinks|water|juice|içecek|su|kola|meşrubat)/i.test(trimmed)) return "drinks";
-            if (/(בשר|עוף|דג|דגים|meat|chicken|fish|et|tavuk|balık)/i.test(trimmed)) return "meat";
-            if (/(ניקיון|חומרי ניקוי|clean|cleaning|temizlik)/i.test(trimmed)) return "cleaning";
-            if (/(חטיפים|ממתקים|snack|snacks|sweets|candy|atıştırmalık|cips|tatlı)/i.test(trimmed)) return "snacks";
-
-            const newKey = "custom_" + trimmed.replace(/\s+/g, "_");
-            if (!state.customCategories[newKey]) {
-                state.customCategories[newKey] = { he: name, en: name, tr: name };
-            }
-            return newKey;
+        function getTimeStr() {
+            const loc = currentLang === "he" ? "he-IL" : currentLang === "tr" ? "tr-TR" : "en-US";
+            return new Date().toLocaleString(loc, { dateStyle: "short", timeStyle: "short" });
         }
 
-        function getCategoryLabel(key, lang = currentLang) {
-            if (CATEGORIES[key] && CATEGORIES[key][lang]) return CATEGORIES[key][lang];
-            if (state.customCategories[key] && state.customCategories[key][lang]) return state.customCategories[key][lang];
-            return CATEGORIES.general[lang];
+        function autoClassify(name) {
+            const n = name.toLowerCase();
+            if (/(מים|קולה|סודה|מיץ|בירה|יין|קפה|תה|משקה|שתיה|שתייה|water|coke|cola|soda|juice|beer|wine|coffee|tea|drink|beverage|su|kola|soda|meyve suyu|bira|şarap|kahve|çay|içecek)/.test(n)) return "drinks";
+            if (/(חלב|גבינה|יוגורט|ביצים|ביצה|קוטג|חמאה|שמנת|milk|cheese|yogurt|egg|eggs|butter|cream|süt|peynir|yoğurt|yumurta|tereyağı)/.test(n)) return "dairy";
+            if (/(עגבניה|מלפפון|בצל|תפוח|בננה|גזר|חסה|פטרוזיליה|תות|ענבים|פרי|ירק|תפוח אדמה|לימון|tomato|cucumber|onion|apple|banana|carrot|lettuce|strawberry|grape|fruit|potato|lemon|domates|salatalık|soğan|elma|muz|havuç|marul|çilek|üzüm|patates|limon)/.test(n)) return "produce";
+            if (/(לחם|פיתה|עוגה|לחמניה|באגט|קוראסון|רוגלך|bread|pita|cake|baguette|croissant|cookie|cookies|ekmek|pasta|börek|simit|kruvasan|kek)/.test(n)) return "bakery";
+            if (/(בשר|עוף|שניצל|סטייק|טחון|סלמון|דג|meat|chicken|steak|beef|salmon|fish|et|tavuk|köfte|balık)/.test(n)) return "meat";
+            if (/(טונה|תירס|רסק|זיתים|מלפפון חמוץ|חומוס גרגרים|אפונה|שימורים|tuna|corn|canned|olive|olives|peas|konserve|ton balığı|mısır|zeytin|salça|bezelye)/.test(n)) return "canned";
+            if (/(שוקולד|חטיף|במבה|ביסלי|ציפס|סוכריות|עוגיות|snack|chocolate|chips|candy|sweets|çikolata|cips|şeker|atıştırmalık)/.test(n)) return "snacks";
+            if (/(סבון|שמפו|משחת שיניים|נייר|מגבונים|דאודורנט|מרכך|אקונומיקה|נוזל כלים|soap|shampoo|toothpaste|paper|wipes|deodorant|conditioner|detergent|sabun|şampuan|diş macunu|peçete|ıslak mendil|deterjan)/.test(n)) return "hygiene";
+            if (/(קפוא|פיצה|גלידה|בורקס|frozen|ice cream|pizza|dondurma|donuk)/.test(n)) return "frozen";
+            return "other";
         }
 
-        const elements = {
-            langSelect: document.getElementById("lang-select"),
-            appTitle: document.getElementById("app-title"),
-            form: document.getElementById("add-form"),
-            input: document.getElementById("item-input"),
-            categorySelect: document.getElementById("category-select"),
-            addBtn: document.getElementById("add-btn"),
-            clearButton: document.getElementById("clear-btn"),
-            actionsBar: document.getElementById("actions-bar"),
-            progressInfo: document.getElementById("progress-info"),
+        const els = {
+            html: document.documentElement,
+            themeBtn: document.getElementById("theme-btn"),
+            langBtn: document.getElementById("lang-btn"),
+            finishCartBtn: document.getElementById("finish-cart-btn"),
+            tabCart: document.getElementById("tab-cart"),
+            tabHistory: document.getElementById("tab-history"),
+            viewCart: document.getElementById("view-cart"),
+            viewHistory: document.getElementById("view-history"),
             listMeta: document.getElementById("list-meta"),
             summaryContainer: document.getElementById("summary-container"),
-            list: document.getElementById("list")
+            addForm: document.getElementById("add-form"),
+            itemInput: document.getElementById("item-input"),
+            txtAdd: document.getElementById("txt-add"),
+            actionsBar: document.getElementById("actions-bar"),
+            progressInfo: document.getElementById("progress-info"),
+            btnClearDone: document.getElementById("btn-clear-done"),
+            itemsList: document.getElementById("items-list"),
+            historyList: document.getElementById("history-list"),
+            historyActionsBar: document.getElementById("history-actions-bar"),
+            historyCountInfo: document.getElementById("history-count-info"),
+            btnClearAllHistory: document.getElementById("btn-clear-all-history"),
+            modal: document.getElementById("category-modal"),
+            modalTitle: document.getElementById("modal-title-text"),
+            modalCloseX: document.getElementById("modal-close-x"),
+            modalItemLbl: document.getElementById("modal-lbl-item"),
+            modalCatLbl: document.getElementById("modal-lbl-cat"),
+            modalItemPreview: document.getElementById("modal-item-name-preview"),
+            categoryGrid: document.getElementById("category-grid"),
+            modalBtnCancel: document.getElementById("modal-btn-cancel"),
+            modalBtnConfirm: document.getElementById("modal-btn-confirm")
         };
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem("cart_theme") || "light";
+            els.html.setAttribute("data-theme", savedTheme);
+            els.themeBtn.textContent = savedTheme === "dark" ? "☀️" : "🌙";
+        }
+
+        els.themeBtn.addEventListener("click", () => {
+            const isDark = els.html.getAttribute("data-theme") === "dark";
+            const next = isDark ? "light" : "dark";
+            els.html.setAttribute("data-theme", next);
+            localStorage.setItem("cart_theme", next);
+            els.themeBtn.textContent = next === "dark" ? "☀️" : "🌙";
+        });
 
         function setLanguage(lang) {
             currentLang = lang;
-            localStorage.setItem("shopping_cart_lang", lang);
+            localStorage.setItem("cart_lang", lang);
             const t = TRANSLATIONS[lang];
 
-            document.documentElement.lang = lang;
-            document.documentElement.dir = t.dir;
-            elements.langSelect.value = lang;
+            els.html.lang = lang;
+            els.html.dir = t.dir;
+            els.langBtn.textContent = t.langCode;
+            els.itemInput.placeholder = t.placeholder;
+            els.txtAdd.textContent = t.addBtn;
+            els.btnClearDone.textContent = t.clearDone;
+            els.btnClearAllHistory.textContent = t.clearAllHistory;
 
-            elements.appTitle.textContent = t.title;
-            elements.input.placeholder = t.placeholder;
-            elements.addBtn.textContent = t.addBtn;
-            elements.clearButton.textContent = t.clearCompleted;
-
-            populateCategories();
-            saveAndRender();
+            buildCategoryGrid();
+            render();
+            if (els.viewHistory.classList.contains("active")) {
+                renderHistory();
+            }
         }
 
-        function populateCategories() {
-            const t = TRANSLATIONS[currentLang];
-            const currentSelectedKey = elements.categorySelect.value || "general";
-            elements.categorySelect.innerHTML = "";
+        els.langBtn.addEventListener("click", () => {
+            const order = ["he", "en", "tr"];
+            const next = order[(order.indexOf(currentLang) + 1) % order.length];
+            setLanguage(next);
+        });
 
-            Object.keys(CATEGORIES).forEach(key => {
-                const opt = document.createElement("option");
-                opt.value = key;
-                opt.textContent = getCategoryLabel(key);
-                elements.categorySelect.appendChild(opt);
-            });
+        els.tabCart.addEventListener("click", () => switchTab("cart"));
+        els.tabHistory.addEventListener("click", () => switchTab("history"));
 
-            Object.keys(state.customCategories).forEach(key => {
-                const opt = document.createElement("option");
-                opt.value = key;
-                opt.textContent = getCategoryLabel(key);
-                elements.categorySelect.appendChild(opt);
-            });
-
-            const newOpt = document.createElement("option");
-            newOpt.value = "__new__";
-            newOpt.textContent = t.newCategoryOption;
-            elements.categorySelect.appendChild(newOpt);
-
-            if (Array.from(elements.categorySelect.options).some(o => o.value === currentSelectedKey)) {
-                elements.categorySelect.value = currentSelectedKey;
+        function switchTab(tab) {
+            if (tab === "cart") {
+                els.tabCart.classList.add("active");
+                els.tabHistory.classList.remove("active");
+                els.viewCart.classList.add("active");
+                els.viewHistory.classList.remove("active");
             } else {
-                elements.categorySelect.value = "general";
+                els.tabHistory.classList.add("active");
+                els.tabCart.classList.remove("active");
+                els.viewHistory.classList.add("active");
+                els.viewCart.classList.remove("active");
+                renderHistory();
             }
         }
 
-        function classifyItem(name) {
-            const n = name.toLowerCase();
-            if (/(מים|קולה|סודה|מיץ|בירה|יין|קפה|תה|משקה|שתיה|שתייה|water|coke|cola|soda|juice|beer|wine|coffee|tea|drink|beverage|su|kola|soda|meyve suyu|bira|şarap|kahve|çay|içecek|meşrubat)/.test(n)) return "drinks";
-            if (/(טונה|תירס|רסק|זיתים|מלפפון חמוץ|חומוס גרגרים|אפונה|שימורים|tuna|corn|canned|olive|olives|peas|konserve|ton balığı|mısır|zeytin|salça|bezelye)/.test(n)) return "canned";
-            if (/(חלב|גבינה|יוגורט|ביצים|ביצה|קוטג|חמאה|שמנת|milk|cheese|yogurt|egg|eggs|butter|cream|süt|peynir|yoğurt|yumurta|tereyağı|kaymak)/.test(n)) return "dairy";
-            if (/(עגבניה|מלפפון|בצל|תפוח|בננה|גזר|חסה|פטרוזיליה|תות|ענבים|פרי|ירק|תפוח אדמה|לימון|tomato|cucumber|onion|apple|banana|carrot|lettuce|strawberry|grape|fruit|potato|lemon|domates|salatalık|soğan|elma|muz|havuç|marul|çilek|üzüm|patates|limon)/.test(n)) return "produce";
-            if (/(לחם|פיתה|עוגה|לחמניה|באגט|קוראסון|רוגלך|bread|pita|cake|baguette|croissant|cookie|cookies|ekmek|pasta|börek|simit|kruvasan|kek)/.test(n)) return "bakery";
-            if (/(בשר|עוף|שניצל|סטייק|טחון|סלמון|דג|meat|chicken|steak|beef|salmon|fish|et|tavuk|köfte|balık|biftek)/.test(n)) return "meat";
-            if (/(שוקולד|חטיף|במבה|ביסלי|ציפס|סוכריות|עוגיות|snack|chocolate|chips|candy|sweets|çikolata|cips|şeker|gofret|atıştırmalık)/.test(n)) return "snacks";
-            if (/(סבון|שמפו|משחת שיניים|נייר|מגבונים|דאודורנט|מרכך|soap|shampoo|toothpaste|paper|wipes|deodorant|conditioner|sabun|şampuan|diş macunu|peçete|ıslak mendil|deodorant|saç kremi)/.test(n)) return "hygiene";
-            if (/(אקונומיקה|נוזל כלים|ספוג|מרכך כביסה|טבליות|bleach|detergent|sponge|cleaning|çamaşır suyu|bulaşık deterjanı|sünger|deterjan)/.test(n)) return "cleaning";
-            if (/(מחשב|לפטופ|מסך|מקלדת|עכבר|אוזניות|טלפון|מטען|כבל|סוללה|laptop|computer|monitor|screen|keyboard|mouse|headphones|phone|charger|cable|battery|bilgisayar|klavye|fare|kulaklık|telefon|şarj|kablo|pil)/.test(n)) return "electronics";
-            if (/(מברג|פטיש|מקדחה|כלי עבודה|מסמר|בורג|screwdriver|hammer|drill|nail|screw|wrench|tornavida|çekiç|matkap|vida|çivi|alet)/.test(n)) return "tools";
-            return "general";
-        }
-
-        function autoClassify() {
-            const name = elements.input.value.trim();
-            if (!name) {
-                elements.categorySelect.value = "general";
-                return;
-            }
-            elements.categorySelect.value = classifyItem(name);
-        }
-
-        function handleCustomCategory() {
-            if (elements.categorySelect.value !== "__new__") return;
-            const t = TRANSLATIONS[currentLang];
-
-            const customName = prompt(t.promptNewCategory);
-            if (!customName || !customName.trim()) {
-                elements.categorySelect.value = "general";
-                return;
-            }
-
-            const catKey = resolveCategoryToKey(customName.trim());
-            populateCategories();
-            elements.categorySelect.value = catKey;
-            saveData();
-        }
-
-        function createId() {
-            return Date.now() + Math.random();
-        }
-
-        function updateTimestamp() {
-            state.lastUpdated = getFormattedTime();
-        }
-
-        function addItem() {
-            const name = elements.input.value.trim();
-            if (!name) return;
-
-            const categoryKey = elements.categorySelect.value === "__new__" ? "general" : elements.categorySelect.value;
-            
-            state.items.push({
-                id: createId(),
-                name,
-                catKey: categoryKey,
-                done: false
+        function buildCategoryGrid() {
+            els.categoryGrid.innerHTML = "";
+            Object.entries(CATEGORIES).forEach(([key, info]) => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = `category-btn ${pendingItem.catKey === key ? "selected" : ""}`;
+                btn.dataset.key = key;
+                btn.innerHTML = `
+                    <span>${info[currentLang]}</span>
+                    <span class="icon">${info.icon}</span>
+                `;
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("selected"));
+                    btn.classList.add("selected");
+                    pendingItem.catKey = key;
+                });
+                els.categoryGrid.appendChild(btn);
             });
-
-            updateTimestamp();
-            elements.input.value = "";
-            elements.categorySelect.value = "general";
-
-            saveAndRender();
-            elements.input.focus();
         }
+
+        function openCategoryModal(name, existingId = null, defaultCat = null) {
+            const t = TRANSLATIONS[currentLang];
+            pendingItem = {
+                name,
+                catKey: defaultCat || autoClassify(name),
+                editingId: existingId
+            };
+
+            els.modalTitle.textContent = existingId ? t.modalTitleEdit : t.modalTitleAdd;
+            els.modalItemPreview.textContent = name;
+            els.modalBtnConfirm.textContent = existingId ? t.modalConfirmEdit : t.modalConfirmAdd;
+            els.modalItemLbl.textContent = t.modalItemLbl;
+            els.modalCatLbl.textContent = t.modalCatLbl;
+            els.modalBtnCancel.textContent = t.modalCancel;
+
+            buildCategoryGrid();
+            els.modal.classList.add("open");
+        }
+
+        function closeModal() {
+            els.modal.classList.remove("open");
+        }
+
+        els.modalCloseX.addEventListener("click", closeModal);
+        els.modalBtnCancel.addEventListener("click", closeModal);
+
+        els.modalBtnConfirm.addEventListener("click", () => {
+            if (pendingItem.editingId) {
+                state.items = state.items.map(i => i.id === pendingItem.editingId ? { ...i, catKey: pendingItem.catKey } : i);
+            } else {
+                state.items.push({
+                    id: Date.now() + Math.random(),
+                    name: pendingItem.name,
+                    catKey: pendingItem.catKey,
+                    done: false
+                });
+                els.itemInput.value = "";
+            }
+            state.lastUpdated = getTimeStr();
+            saveState();
+            closeModal();
+            render();
+        });
+
+        els.addForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const val = els.itemInput.value.trim();
+            if (!val) return;
+            openCategoryModal(val);
+        });
 
         function toggleItem(id) {
             const prevDoneCount = state.items.filter(i => i.done).length;
-
-            state.items = state.items.map(item =>
-                item.id === id ? { ...item, done: !item.done } : item
-            );
-
-            updateTimestamp();
-            saveAndRender();
+            state.items = state.items.map(i => i.id === id ? { ...i, done: !i.done } : i);
+            state.lastUpdated = getTimeStr();
+            saveState();
+            render();
 
             const allDone = state.items.length > 0 && state.items.every(i => i.done);
             if (allDone && prevDoneCount !== state.items.length) {
-                setTimeout(promptTotalCost, 200);
+                setTimeout(promptFinalCost, 250);
             }
         }
 
-        function promptTotalCost() {
+        function promptFinalCost() {
             const t = TRANSLATIONS[currentLang];
-            const amount = prompt(t.promptAllDone, state.totalCost || "");
-            if (amount !== null && amount.trim() !== "") {
-                const numeric = parseFloat(amount.replace(/[^\d.]/g, ""));
+            const val = prompt(t.promptTotalDone, state.totalCost || "");
+            if (val !== null && val.trim() !== "") {
+                const numeric = parseFloat(val.replace(/[^\d.]/g, ""));
                 if (!isNaN(numeric)) {
                     state.totalCost = numeric;
-                    saveAndRender();
+                    saveState();
+                    render();
                 }
             }
         }
 
         function deleteItem(id) {
-            state.items = state.items.filter(item => item.id !== id);
+            state.items = state.items.filter(i => i.id !== id);
             if (state.items.length === 0) state.totalCost = null;
-            updateTimestamp();
-            saveAndRender();
-        }
-
-        function clearCompleted() {
-            state.items = state.items.filter(item => !item.done);
-            if (state.items.length === 0) state.totalCost = null;
-            updateTimestamp();
-            saveAndRender();
-        }
-
-        function changeCategory(id) {
-            const currentItem = state.items.find(item => item.id === id);
-            if (!currentItem) return;
-
-            const t = TRANSLATIONS[currentLang];
-            const currentCatName = getCategoryLabel(currentItem.catKey);
-            const availableOptions = Array.from(elements.categorySelect.options)
-                .map(o => o.textContent)
-                .filter(txt => txt !== t.newCategoryOption);
-
-            const userInput = prompt(
-                t.promptChangeCategory(currentItem.name, availableOptions.join(", ")),
-                currentCatName
-            );
-
-            if (!userInput || !userInput.trim()) return;
-
-            const newKey = resolveCategoryToKey(userInput.trim());
-            currentItem.catKey = newKey;
-
-            updateTimestamp();
-            populateCategories();
-            saveAndRender();
-        }
-
-        function saveAndRender() {
-            saveData();
+            state.lastUpdated = getTimeStr();
+            saveState();
             render();
         }
 
+        els.btnClearDone.addEventListener("click", () => {
+            state.items = state.items.filter(i => !i.done);
+            if (state.items.length === 0) state.totalCost = null;
+            state.lastUpdated = getTimeStr();
+            saveState();
+            render();
+        });
+
+        els.finishCartBtn.addEventListener("click", () => {
+            if (state.items.length === 0) return;
+            promptFinalCost();
+            if (state.totalCost !== null) {
+                state.history.unshift({
+                    id: Date.now(),
+                    date: getTimeStr(),
+                    totalCost: state.totalCost,
+                    items: [...state.items]
+                });
+                state.items = [];
+                state.totalCost = null;
+                state.lastUpdated = getTimeStr();
+                saveState();
+                render();
+                switchTab("history");
+            }
+        });
+
+        function deleteHistoryItem(id) {
+            state.history = state.history.filter(h => h.id !== id);
+            saveState();
+            renderHistory();
+        }
+
+        els.btnClearAllHistory.addEventListener("click", () => {
+            const t = TRANSLATIONS[currentLang];
+            if (confirm(t.confirmClearAllHistory)) {
+                state.history = [];
+                saveState();
+                renderHistory();
+            }
+        });
+
         function render() {
             const t = TRANSLATIONS[currentLang];
-            elements.listMeta.textContent = `${t.lastUpdated} ${state.lastUpdated}`;
+            els.listMeta.textContent = `${t.lastUpdated} ${state.lastUpdated}`;
 
             if (state.totalCost !== null) {
-                elements.summaryContainer.innerHTML = `
+                els.summaryContainer.innerHTML = `
                     <div class="summary-card">
                         <div>
-                            <span class="summary-title">${t.totalCostTitle}</span>
-                            <button type="button" class="edit-cost-btn" id="edit-cost-btn">${t.editCost}</button>
+                            <span class="summary-title">${t.totalTitle}</span>
+                            <button type="button" class="summary-action-btn" id="edit-cost-btn">${t.editAmount}</button>
                         </div>
-                        <div class="summary-cost">${CURRENCY_SYMBOL}${state.totalCost.toLocaleString()}</div>
+                        <div class="summary-cost">${CURRENCY}${state.totalCost.toLocaleString()}</div>
                     </div>
                 `;
-                document.getElementById("edit-cost-btn").addEventListener("click", promptTotalCost);
+                document.getElementById("edit-cost-btn").addEventListener("click", promptFinalCost);
             } else {
-                elements.summaryContainer.innerHTML = "";
+                els.summaryContainer.innerHTML = "";
             }
 
-            const doneCount = state.items.filter(i => i.done).length;
-            const totalCount = state.items.length;
-
-            if (totalCount > 0) {
-                elements.actionsBar.hidden = false;
-                elements.progressInfo.textContent = t.progress(doneCount, totalCount);
+            const total = state.items.length;
+            const done = state.items.filter(i => i.done).length;
+            if (total > 0) {
+                els.actionsBar.hidden = false;
+                els.progressInfo.textContent = t.progress(done, total);
             } else {
-                elements.actionsBar.hidden = true;
+                els.actionsBar.hidden = true;
             }
 
-            const sortedItems = [...state.items].sort((a, b) => Number(a.done) - Number(b.done));
-
-            if (sortedItems.length === 0) {
-                elements.list.innerHTML = `<p class="empty-state">${t.emptyList}</p>`;
+            if (total === 0) {
+                els.itemsList.innerHTML = `
+                    <div class="empty-box">
+                        <div class="empty-icon">🛒</div>
+                        <div class="empty-title">${t.emptyCartTitle}</div>
+                        <div class="empty-desc">${t.emptyCartDesc}</div>
+                    </div>
+                `;
                 return;
             }
 
-            elements.list.innerHTML = sortedItems
-                .map(item => `
-                    <div class="item ${item.done ? "done" : ""}" data-id="${item.id}">
-                        <div class="item-content" data-action="toggle" role="button" tabindex="0">
-                            <span class="item-check">${item.done ? "✅" : "⬜"}</span>
-                            <span class="item-text">${escapeHTML(item.name)}</span>
+            const sorted = [...state.items].sort((a, b) => Number(a.done) - Number(b.done));
+            els.itemsList.innerHTML = sorted.map(item => {
+                const cat = CATEGORIES[item.catKey] || CATEGORIES.other;
+                return `
+                    <div class="item-row ${item.done ? "done" : ""}" data-id="${item.id}">
+                        <div class="item-main" data-action="toggle">
+                            <div class="item-checkbox">${item.done ? "✓" : ""}</div>
+                            <span class="item-name">${escapeHTML(item.name)}</span>
                         </div>
-
-                        <div class="meta-side">
-                            <span class="cat-badge" data-action="category" role="button" tabindex="0">
-                                ${escapeHTML(getCategoryLabel(item.catKey))}
+                        <div class="item-meta">
+                            <span class="category-chip" data-action="category">
+                                <span>${cat.icon}</span>
+                                <span>${cat[currentLang]}</span>
                             </span>
-                            <button type="button" class="delete-btn" data-action="delete" title="${t.deleteTitle}">
-                                🗑️
-                            </button>
+                            <button type="button" class="btn-delete" data-action="delete" title="Delete">🗑️</button>
                         </div>
                     </div>
-                `)
-                .join("");
+                `;
+            }).join("");
         }
 
-        function escapeHTML(value) {
-            return String(value)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+        function renderHistory() {
+            const t = TRANSLATIONS[currentLang];
+            if (state.history.length === 0) {
+                els.historyActionsBar.style.display = "none";
+                els.historyList.innerHTML = `
+                    <div class="empty-box">
+                        <div class="empty-icon">🧾</div>
+                        <div class="empty-title">${t.emptyHistoryTitle}</div>
+                        <div class="empty-desc">${t.emptyHistoryDesc}</div>
+                    </div>
+                `;
+                return;
+            }
+
+            els.historyActionsBar.style.display = "flex";
+            els.historyCountInfo.textContent = t.historySummaryCount(state.history.length);
+
+            els.historyList.innerHTML = state.history.map(h => `
+                <div class="history-card" data-id="${h.id}">
+                    <div class="history-card-header">
+                        <div class="history-card-header-left">
+                            <button type="button" class="btn-delete" data-action="delete-history" title="Delete record">🗑️</button>
+                            <span class="history-date">${h.date}</span>
+                        </div>
+                        <span class="history-amount">${CURRENCY}${Number(h.totalCost).toLocaleString()}</span>
+                    </div>
+                    <div class="history-items-preview">
+                        <strong>${t.historyItemsCount(h.items.length)}:</strong>
+                        ${h.items.map(i => escapeHTML(i.name)).join(", ")}
+                    </div>
+                </div>
+            `).join("");
         }
 
-        elements.langSelect.addEventListener("change", e => setLanguage(e.target.value));
-        elements.form.addEventListener("submit", e => {
-            e.preventDefault();
-            addItem();
-        });
-        elements.input.addEventListener("input", autoClassify);
-        elements.categorySelect.addEventListener("change", handleCustomCategory);
-        elements.clearButton.addEventListener("click", clearCompleted);
-
-        elements.list.addEventListener("click", e => {
+        els.itemsList.addEventListener("click", (e) => {
             const actionEl = e.target.closest("[data-action]");
             if (!actionEl) return;
-
-            const itemEl = actionEl.closest(".item");
-            if (!itemEl) return;
-
-            const id = Number(itemEl.dataset.id);
+            const row = actionEl.closest(".item-row");
+            if (!row) return;
+            const id = Number(row.dataset.id);
             const action = actionEl.dataset.action;
 
             if (action === "toggle") toggleItem(id);
-            if (action === "category") changeCategory(id);
             if (action === "delete") deleteItem(id);
+            if (action === "category") {
+                const item = state.items.find(i => i.id === id);
+                if (item) openCategoryModal(item.name, item.id, item.catKey);
+            }
         });
 
+        els.historyList.addEventListener("click", (e) => {
+            const actionEl = e.target.closest('[data-action="delete-history"]');
+            if (!actionEl) return;
+            const card = actionEl.closest(".history-card");
+            if (!card) return;
+            const id = Number(card.dataset.id);
+            deleteHistoryItem(id);
+        });
+
+        function escapeHTML(str) {
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        initTheme();
         setLanguage(currentLang);
     </script>
 </body>
